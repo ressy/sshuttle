@@ -6,6 +6,7 @@ import subprocess as ssubprocess
 from sshuttle.helpers import log, debug1, Fatal, family_to_string
 from sshuttle.options import TTL
 
+
 def nonfatal(func, *args):
     try:
         func(*args)
