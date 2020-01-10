@@ -7,6 +7,7 @@ from sshuttle import __version__
 # Special TTL value to track sshuttle'd packets
 TTL = 42
 
+
 # Subnet file, supporting empty lines and hash-started comment lines
 def parse_subnetport_file(s):
     try:
