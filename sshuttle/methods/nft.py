@@ -2,6 +2,7 @@ import socket
 from sshuttle.firewall import subnet_weight
 from sshuttle.linux import nft, nft_get_handle, nonfatal
 from sshuttle.methods import BaseMethod
+from sshuttle.options import TTL
 
 
 class Method(BaseMethod):
