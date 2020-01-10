@@ -3,6 +3,7 @@ import subprocess as ssubprocess
 from sshuttle.methods import BaseMethod
 from sshuttle.helpers import log, debug1, debug3, \
     Fatal, family_to_string
+from sshuttle.options import TTL
 
 recvmsg = None
 try:
@@ -70,7 +71,7 @@ def ipfw_rule_exists(n):
     found = False
     for line in p.stdout:
         if line.startswith(b'%05d ' % n):
-            if not ('ipttl 42' in line or 'check-state' in line):
+            if not (('ipttl %d' % TTL) in line or 'check-state' in line):
                 log('non-sshuttle ipfw rule: %r\n' % line.strip())
                 raise Fatal('non-sshuttle ipfw rule #%d already exists!' % n)
             found = True
@@ -185,7 +186,7 @@ class Method(BaseMethod):
         sender.setsockopt(socket.SOL_IP, IP_BINDANY, 1)
         sender.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sender.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
-        sender.setsockopt(socket.SOL_IP, socket.IP_TTL, 42)
+        sender.setsockopt(socket.SOL_IP, socket.IP_TTL, TTL)
         sender.bind(srcip)
         sender.sendto(data, dstip)
         sender.close()
@@ -224,7 +225,7 @@ class Method(BaseMethod):
         ipfw('add', '1', 'fwd', '127.0.0.1,%d' % port,
              'tcp',
              'from', 'any', 'to', 'table(126)',
-             'not', 'ipttl', '42', 'keep-state', 'setup')
+             'not', 'ipttl', str(TTL), 'keep-state', 'setup')
 
         ipfw_noexit('table', '124', 'flush')
         dnscount = 0
@@ -235,11 +236,11 @@ class Method(BaseMethod):
             ipfw('add', '1', 'fwd', '127.0.0.1,%d' % dnsport,
                  'udp',
                  'from', 'any', 'to', 'table(124)',
-                 'not', 'ipttl', '42')
+                 'not', 'ipttl', str(TTL))
         ipfw('add', '1', 'allow',
              'udp',
              'from', 'any', 'to', 'any',
-             'ipttl', '42')
+             'ipttl', str(TTL))
 
         if subnets:
             # create new subnet entries
